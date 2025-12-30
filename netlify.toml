@@ -1,0 +1,12 @@
+[build]
+  base = "client"
+  publish = "dist"
+  command = "npm install && npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Proxy API requests to backend (during dev/preview if needed, although prod will use VITE_API_URL)
+# Production setup will use VITE_API_URL env var instead of proxy, but this helps catch-all.
