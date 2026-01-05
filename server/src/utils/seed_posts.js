@@ -97,6 +97,38 @@ const SEED_POSTS = [
         city: "Surabaya",
         occupation: "Karyawan",
         gender: "NB"
+    },
+
+    // Additional sample posts
+    {
+        content: "Weekend tapi masih mikirin kerjaan Senin.",
+        city: "Jakarta",
+        occupation: "Karyawan",
+        gender: null
+    },
+    {
+        content: "Rasanya udah lama nggak ketawa lepas.",
+        city: "Bandung",
+        occupation: null,
+        gender: "F"
+    },
+    {
+        content: "Kadang capek jadi yang paling ngerti di keluarga.",
+        city: "Surabaya",
+        occupation: "Karyawan",
+        gender: "M"
+    },
+    {
+        content: "Pengen resign tapi tanggung kredit motor.",
+        city: "Jakarta",
+        occupation: "Karyawan",
+        gender: null
+    },
+    {
+        content: "Ada yang ngerasa hidup lagi di autopilot?",
+        city: "Yogyakarta",
+        occupation: "Mahasiswa",
+        gender: "NB"
     }
 ];
 

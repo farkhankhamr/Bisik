@@ -76,10 +76,11 @@ export default function PostCard({ post }) {
                             📍 {distanceStr}
                         </span>
 
-                        {/* City Chip */}
+                        {/* City Chip - HIDDEN
                         <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-full text-xs font-semibold">
                             {post.city}
                         </span>
+                        */}
 
                         {/* Institution Chip */}
                         {post.institution && (
@@ -97,24 +98,31 @@ export default function PostCard({ post }) {
 
                         {/* Gender Chip */}
                         {post.gender && (
-                            <span className="bg-pink-50 text-pink-600 px-2 py-1 rounded-full text-xs flex items-center gap-1 font-semibold">
+                            <span className={clsx(
+                                "px-2 py-1 rounded-full text-xs flex items-center gap-1 font-semibold",
+                                post.gender === 'M' && "bg-blue-50 text-blue-600",
+                                post.gender === 'F' && "bg-red-50 text-red-600",
+                                post.gender === 'NB' && "bg-purple-50 text-purple-600"
+                            )}>
                                 <User size={10} /> {post.gender === 'M' ? 'Pria' : post.gender === 'F' ? 'Wanita' : 'NB'}
                             </span>
                         )}
 
-                        {/* Occupation Chip */}
+                        {/* Occupation Chip - HIDDEN
                         {post.occupation && (
                             <span className="bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full text-xs flex items-center gap-1 font-semibold">
                                 <Briefcase size={10} /> {post.occupation}
                             </span>
                         )}
+                        */}
 
-                        {/* Seed Post Badge */}
+                        {/* Seed Post Badge - HIDDEN
                         {isSeed && (
                             <span className="text-[10px] text-slate-400 px-2 py-0.5 rounded-full bg-slate-100 italic">
                                 Topik pembuka
                             </span>
                         )}
+                        */}
                     </div>
 
                     {/* Actions Menu */}

@@ -11,5 +11,6 @@ client/.env
 server/node_modules
 server/.env
 *.log
-mongodb.log
+mongodb.log*
 data/
+mongodb_data/
