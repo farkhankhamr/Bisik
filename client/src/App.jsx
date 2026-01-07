@@ -6,10 +6,13 @@ import Feed from './pages/Feed';
 import Chat from './pages/Chat';
 
 function ProtectedRoute({ children }) {
-    const anonId = useUserStore(state => state.anonId);
+    const { anonId, city } = useUserStore(state => ({
+        anonId: state.anonId,
+        city: state.city
+    }));
     const location = useLocation();
 
-    if (!anonId) {
+    if (!anonId || !city) {
         return <Navigate to="/onboarding" state={{ from: location }} replace />;
     }
 
