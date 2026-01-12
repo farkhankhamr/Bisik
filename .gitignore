@@ -1,0 +1,16 @@
+node_modules
+.DS_Store
+.env
+dist
+coverage
+npm-debug.log
+yarn-error.log
+client/node_modules
+client/dist
+client/.env
+server/node_modules
+server/.env
+*.log
+mongodb.log*
+data/
+mongodb_data/
