@@ -5,3 +5,18 @@
 body {
     @apply bg-slate-50 text-slate-900;
 }
+
+@layer utilities {
+    .animate-typewriter {
+        animation: typewriter 2s steps(20) infinite alternate, blink .7s infinite;
+    }
+}
+
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
