@@ -17,11 +17,6 @@ fastify.register(require('fastify-socket.io'), {
 // Database
 connectDB();
 
-// Seed posts if DB is empty
-const seedPosts = require('./utils/seed_posts');
-connectDB().then(() => {
-    seedPosts();
-});
 
 // Routes
 fastify.register(require('./routes/posts'));
