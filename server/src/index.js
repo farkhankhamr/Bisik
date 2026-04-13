@@ -25,6 +25,14 @@ connectDB();
 
 
 // Routes
+// 1. Root level for backward compatibility with old frontend deployments (like gogon.space)
+fastify.register(require('./routes/posts'));
+fastify.register(require('./routes/comments'));
+fastify.register(require('./routes/intel'));
+fastify.register(require('./routes/reports'));
+fastify.register(require('./routes/config'));
+
+// 2. /api prefix for new full-stack integrated architecture
 fastify.register(require('./routes/posts'), { prefix: '/api' });
 fastify.register(require('./routes/comments'), { prefix: '/api' });
 fastify.register(require('./routes/intel'), { prefix: '/api' });
