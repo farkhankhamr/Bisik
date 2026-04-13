@@ -139,7 +139,7 @@ const intelRoutes = async (fastify, options) => {
             });
         } else {
             pipeline.push({ $match: { status: 'ACTIVE' } });
-            if (city) pipeline.push({ $match: { city: city } });
+            if (city && city !== 'null' && city !== 'undefined') pipeline.push({ $match: { city: city } });
         }
 
         // 2. Type Filter

@@ -40,7 +40,7 @@ const postsRoutes = async (fastify, options) => {
       });
     } else {
       const matchStage = { status: 'active' };
-      if (city) matchStage.city = city;
+      if (city && city !== 'null' && city !== 'undefined') matchStage.city = city;
       if (cursor) matchStage.created_at = { $lt: new Date(cursor) };
       pipeline.push({ $match: matchStage });
     }
