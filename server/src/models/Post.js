@@ -55,6 +55,6 @@ const PostSchema = new mongoose.Schema({
 });
 
 // Index for daily summary queries
-PostSchema.index({ createdDateKey: 1, status: 1 });
+// No redundant index needed as createdDateKey is indexed in the schema definition
 
 module.exports = mongoose.model('Post', PostSchema);

@@ -41,7 +41,7 @@ const PostAuditSchema = new mongoose.Schema({
 });
 
 // Compound index for daily summary queries
-PostAuditSchema.index({ createdDateKey: 1 });
+// Re-evaluate if compound index is needed; for now, createdDateKey is already indexed in the schema definition.
 
 // Static helper to hash anon_id
 PostAuditSchema.statics.hashAnonId = function (anon_id) {
