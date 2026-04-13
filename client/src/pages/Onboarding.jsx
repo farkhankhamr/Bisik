@@ -11,17 +11,27 @@ export default function Onboarding() {
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedOccupation, setSelectedOccupation] = useState('');
     const [selectedGender, setSelectedGender] = useState('');
+    const [locationStatus, setLocationStatus] = useState('idle');
 
     const { initUser, setLocation } = useUserStore();
     const navigate = useNavigate();
 
     const handleLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => setLocation(pos.coords.latitude, pos.coords.longitude),
-                (err) => console.error(err)
-            );
+        if (!navigator.geolocation) {
+            setLocationStatus('denied');
+            return;
         }
+        setLocationStatus('requesting');
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setLocation(pos.coords.latitude, pos.coords.longitude);
+                setLocationStatus('granted');
+            },
+            (err) => {
+                console.error(err);
+                setLocationStatus('denied');
+            }
+        );
     };
 
     const handleStart = () => {
@@ -55,12 +65,26 @@ export default function Onboarding() {
 
                     {/* Location */}
                     <button
+                        type="button"
                         onClick={handleLocation}
                         className="w-full py-3 rounded-xl flex items-center justify-center gap-2 transition"
-                        style={{ border: '1.5px dashed #C4B8AC', color: '#7c5a41', fontFamily: 'Courier Prime, monospace' }}
+                        style={{
+                            border: locationStatus === 'granted' ? '1.5px solid #4CAF50' : '1.5px dashed #C4B8AC',
+                            color: locationStatus === 'granted' ? '#4CAF50' : locationStatus === 'denied' ? '#ef4444' : '#7c5a41',
+                            fontFamily: 'Courier Prime, monospace',
+                            backgroundColor: locationStatus === 'granted' ? '#f0fdf4' : 'transparent',
+                        }}
                     >
                         <MapPin size={16} />
-                        <span className="text-sm">Aktifkan Lokasi (Untuk filter jarak)</span>
+                        <span className="text-sm">
+                            {locationStatus === 'granted'
+                                ? '✓ Lokasi Aktif'
+                                : locationStatus === 'denied'
+                                ? 'Izin Lokasi Ditolak'
+                                : locationStatus === 'requesting'
+                                ? 'Meminta izin...'
+                                : 'Aktifkan Lokasi (Untuk filter jarak)'}
+                        </span>
                     </button>
 
                     {/* City */}

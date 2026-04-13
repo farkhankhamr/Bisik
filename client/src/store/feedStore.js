@@ -99,7 +99,7 @@ const useFeedStore = create((set, get) => ({
 
     fetchMorePosts: async () => {
         const { lastCursor, hasMore, loadingMore } = get();
-        if (!hasMore || loadingMore) return;
+        if (!hasMore || loadingMore || !lastCursor) return;
         await get().fetchPosts({}, lastCursor);
     },
 

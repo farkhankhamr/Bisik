@@ -101,11 +101,16 @@ export default function Feed() {
     const handleSubmit = async () => {
         if (!canSubmit) return;
         setIsSubmitting(true);
-        await addPost({ content, city, institution: null, gender, occupation, anon_id: anonId, lat: location?.lat, long: location?.long, topic: null });
-        setContent('');
-        setIsSubmitting(false);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        try {
+            await addPost({ content, city, institution: null, gender, occupation, anon_id: anonId, lat: location?.lat, long: location?.long, topic: null });
+            setContent('');
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+        } catch (err) {
+            console.error('Post failed:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleKeyDown = (e) => {

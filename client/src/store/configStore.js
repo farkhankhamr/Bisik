@@ -10,7 +10,7 @@ const useConfigStore = create((set, get) => ({
         set({ isLoading: true });
         try {
             // Public endpoint might be needed for clients, but for now we might just expose it
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/public/settings`);
+            const res = await fetch('/api/public/settings');
             if (res.ok) {
                 const data = await res.json();
                 const settingsObj = {};

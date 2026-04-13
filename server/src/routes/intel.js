@@ -13,8 +13,6 @@ const SPAM_PATTERNS = [
     /http[s]?:\/\//,
     /www\./,
     /\.com/,
-    /jl\.\s+/i, // "Jl. " pattern for addresses
-    /jalan\s+/i,
     /dm\s+/i,
     /inbox\s+/i
 ];
@@ -61,7 +59,7 @@ const intelRoutes = async (fastify, options) => {
         const { type, content, city, area, anon_id, lat, long, deal_meta, headsup_meta } = request.body;
 
         // 1. Validation
-        if (!content || !type || !city || !anon_id) {
+        if (!content || !type || !anon_id) {
             return reply.code(400).send({ error: 'Missing required fields' });
         }
 
@@ -78,8 +76,8 @@ const intelRoutes = async (fastify, options) => {
         }
 
         // 3. Rate Limiting (Basic query check)
-        // Deal: 1 per 30m, Headsup: 1 per 10m
-        const rateWindow = type === 'DEAL' ? 30 : 10;
+        // Deal: 1 per 5m, Headsup: 1 per 2m (MVP reduced for testing/activity)
+        const rateWindow = type === 'DEAL' ? 5 : 2;
         const timeAgo = new Date(Date.now() - rateWindow * 60 * 1000);
 
         const recentPost = await IntelPost.findOne({
