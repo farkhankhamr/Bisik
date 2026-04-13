@@ -7,7 +7,6 @@ import DealCard from '../components/DealCard';
 import HeadsUpCard from '../components/HeadsUpCard';
 import IntelComposer from '../components/IntelComposer';
 import { Search, Megaphone, Loader2 } from 'lucide-react';
-import clsx from 'clsx';
 import WelcomeModal from '../components/WelcomeModal';
 import Avatar from '../components/Avatar';
 
@@ -29,7 +28,7 @@ const MOCK_ADS = [
 ];
 
 export default function Feed() {
-    const { posts, intel, myPosts, loading, fetchPosts, fetchIntel, addPost } = useFeedStore();
+    const { posts, intel, myPosts, loading, hasMore, loadingMore, fetchPosts, fetchIntel, fetchMorePosts, searchPosts, addPost } = useFeedStore();
     const { city, anonId, gender, occupation, location } = useUserStore();
 
     const [showIntelComposer, setShowIntelComposer] = useState(false);
@@ -43,6 +42,7 @@ export default function Feed() {
     const [searchFocused, setSearchFocused] = useState(false);
     const [placeholder] = useState(() => PROMPTS[Math.floor(Math.random() * PROMPTS.length)]);
     const textareaRef = useRef(null);
+    const sentinelRef = useRef(null);
 
     const charCount = content.length;
     const isOverLimit = charCount > MAX_CHARS;
@@ -59,6 +59,39 @@ export default function Feed() {
             fetchPosts({ myPosts: true });
         }
     }, [city, activeTab]);
+
+    // Server-side search with 400ms debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery.trim()) {
+                searchPosts(searchQuery.trim());
+            } else {
+                const params = { radius: null };
+                if (activeTab === 'all') {
+                    fetchPosts(params);
+                } else if (activeTab === 'popular') {
+                    fetchPosts({ ...params, sort: 'popular' });
+                }
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Infinite scroll via IntersectionObserver
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMore && !loadingMore) {
+                    fetchMorePosts();
+                }
+            },
+            { threshold: 0.1 }
+        );
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [hasMore, loadingMore, fetchMorePosts]);
 
     const handleCloseWelcome = () => {
         localStorage.setItem('WELCOME_SHOWN', 'true');
@@ -107,19 +140,8 @@ export default function Feed() {
         if (filterChip === 'HEADSUP') { filteredPosts = []; filteredIntel = intel.filter(i => i.type === 'HEADSUP'); }
 
         const combined = [...filteredPosts, ...filteredIntel];
-        const sorted = combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        // Search filter
-        if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase();
-            return sorted.filter(item =>
-                (item.content || '').toLowerCase().includes(q) ||
-                (item.city || '').toLowerCase().includes(q)
-            );
-        }
-
-        return sorted;
-    }, [activeTab, filterChip, posts, intel, myPosts, searchQuery]);
+        return combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }, [activeTab, filterChip, posts, intel, myPosts]);
 
     return (
         <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#F5EFE8' }}>
@@ -256,6 +278,21 @@ export default function Feed() {
                         </p>
                     </div>
                 )}
+
+                {/* Infinite scroll sentinel */}
+                <div ref={sentinelRef} />
+
+                {loadingMore && (
+                    <div className="flex justify-center py-4" style={{ color: '#8C8476' }}>
+                        <Loader2 className="animate-spin" size={18} />
+                    </div>
+                )}
+
+                {!hasMore && mixedFeed.length > 0 && (
+                    <p className="text-center py-4" style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace', fontSize: '13px' }}>
+                        Udah semua nih 🤫
+                    </p>
+                )}
             </div>
 
             {/* Bottom Composer — Fixed */}
@@ -263,6 +300,17 @@ export default function Feed() {
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-20"
                 style={{ backgroundColor: '#F5EFE8', borderTop: '1px solid #E0D5CA' }}
             >
+                <button
+                    type="button"
+                    onClick={() => setShowIntelComposer(true)}
+                    className="w-full flex items-center justify-between px-4 py-2 mb-2"
+                    style={{ backgroundColor: '#EDE5DC', borderBottom: '1px solid #D4C8BC', fontFamily: 'Courier Prime, monospace' }}
+                >
+                    <span className="flex items-center gap-2 text-xs font-bold" style={{ color: '#5A4E3D' }}>
+                        <Megaphone size={12} /> Bagikan info sekitar
+                    </span>
+                    <span className="text-xs" style={{ color: '#8C8476' }}>→</span>
+                </button>
                 <div className="px-4 py-3">
                     {/* Composer card with Avatar */}
                     <div className="flex gap-3">

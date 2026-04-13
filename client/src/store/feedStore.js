@@ -3,12 +3,17 @@ import useUserStore from './userStore';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+const PAGE_SIZE = 20;
+
 const useFeedStore = create((set, get) => ({
     posts: [],
     intel: [],
     myPosts: [],
     loading: false,
     error: null,
+    lastCursor: null,
+    hasMore: true,
+    loadingMore: false,
 
     // Fetch Intel (Deals/Headsup)
     fetchIntel: async (filters = {}) => {
@@ -38,21 +43,21 @@ const useFeedStore = create((set, get) => ({
         }
     },
 
-    fetchPosts: async (filters = {}) => {
-        set({ loading: true });
+    fetchPosts: async (filters = {}, cursor = null) => {
+        if (cursor) {
+            set({ loadingMore: true });
+        } else {
+            set({ loading: true, lastCursor: null, hasMore: true });
+        }
         try {
             const params = new URLSearchParams();
-            // user defaults
             const { city, institution, location } = useUserStore.getState();
-
-            // Merge defaults with explicit filters
             const finalFilters = { city, institution, ...filters };
 
             if (finalFilters.city) params.append('city', finalFilters.city);
             if (finalFilters.institution) params.append('institution', finalFilters.institution);
             if (finalFilters.topic) params.append('topic', finalFilters.topic);
 
-            // Geo filters
             if (finalFilters.radius && location && location.lat) {
                 params.append('lat', location.lat);
                 params.append('long', location.long);
@@ -69,18 +74,53 @@ const useFeedStore = create((set, get) => ({
                 return;
             }
 
-            // Standard Feed (needs anon_id for has_liked check)
             params.append('anon_id', useUserStore.getState().anonId);
+            params.append('limit', String(PAGE_SIZE));
 
-            // Sort parameter
-            if (finalFilters.sort) {
-                params.append('sort', finalFilters.sort);
-            }
+            if (finalFilters.sort) params.append('sort', finalFilters.sort);
+            if (cursor) params.append('cursor', cursor);
 
             const res = await fetch(`${API_URL}/posts?${params.toString()}`);
             if (!res.ok) throw new Error('Failed to fetch posts');
             const data = await res.json();
-            set({ posts: data, loading: false });
+
+            const newCursor = data.length > 0 ? data[data.length - 1].created_at : null;
+            const hasMore = data.length >= PAGE_SIZE;
+
+            if (cursor) {
+                set(state => ({ posts: [...state.posts, ...data], loadingMore: false, lastCursor: newCursor, hasMore }));
+            } else {
+                set({ posts: data, loading: false, lastCursor: newCursor, hasMore });
+            }
+        } catch (err) {
+            set({ error: err.message, loading: false, loadingMore: false });
+        }
+    },
+
+    fetchMorePosts: async () => {
+        const { lastCursor, hasMore, loadingMore } = get();
+        if (!hasMore || loadingMore) return;
+        await get().fetchPosts({}, lastCursor);
+    },
+
+    searchPosts: async (query) => {
+        set({ loading: true, lastCursor: null, hasMore: true });
+        try {
+            const params = new URLSearchParams();
+            const { city } = useUserStore.getState();
+            const { anonId } = useUserStore.getState();
+            if (city) params.append('city', city);
+            params.append('anon_id', anonId);
+            params.append('q', query);
+            params.append('limit', String(PAGE_SIZE));
+
+            const res = await fetch(`${API_URL}/posts?${params.toString()}`);
+            if (!res.ok) throw new Error('Failed to search posts');
+            const data = await res.json();
+
+            const newCursor = data.length > 0 ? data[data.length - 1].created_at : null;
+            const hasMore = data.length >= PAGE_SIZE;
+            set({ posts: data, loading: false, lastCursor: newCursor, hasMore });
         } catch (err) {
             set({ error: err.message, loading: false });
         }
