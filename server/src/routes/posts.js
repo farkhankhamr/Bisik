@@ -19,10 +19,11 @@ const shuffle = (array) => {
 };
 
 const postsRoutes = async (fastify, options) => {
-  // GET /posts - Feed with geospatial filtering
+  // GET /posts - Feed with geospatial filtering, cursor pagination, and search
   fastify.get('/posts', async (request, reply) => {
-    const { city, institution, topic, lat, long, radius, anon_id, sort } = request.query;
+    const { city, institution, topic, lat, long, radius, anon_id, sort, q, cursor, limit } = request.query;
 
+    const pageLimit = parseInt(limit) || 20;
     let pipeline = [];
     const meters = radius ? parseInt(radius) : 10000; // Default 10km
 
@@ -38,47 +39,51 @@ const postsRoutes = async (fastify, options) => {
         }
       });
     } else {
-      pipeline.push({ $match: { status: 'active' } });
-      if (city) pipeline.push({ $match: { city: city } });
+      const matchStage = { status: 'active' };
+      if (city) matchStage.city = city;
+      if (cursor) matchStage.created_at = { $lt: new Date(cursor) };
+      pipeline.push({ $match: matchStage });
     }
 
     // 2. Additional Filters
     if (institution) pipeline.push({ $match: { institution: institution } });
     if (topic) pipeline.push({ $match: { topic: topic } });
 
-    // 3. Sorting
+    // 3. Search filter
+    if (q && q.trim()) {
+      pipeline.push({ $match: { content: { $regex: q.trim(), $options: 'i' } } });
+    }
+
+    // 4. Sorting
     if (sort === 'popular') {
       pipeline.push({ $sort: { likes: -1 } });
     } else if (!lat || !long) {
-      // If no geoNear, manual sort by creation time
       pipeline.push({ $sort: { created_at: -1 } });
     }
 
-    // 4. Limit results
-    pipeline.push({ $limit: 15 }); // Limit real posts to 15 (allows seed injection)
+    // 5. Limit results
+    pipeline.push({ $limit: pageLimit });
 
     const posts = await Post.aggregate(pipeline);
 
-    // 5. Check if current user liked these posts
+    // 6. Check if current user liked these posts
     const postsWithStatus = await Promise.all(posts.map(async (p) => {
       const liked = anon_id ? await PostLike.exists({ post_id: p.post_id, anon_id }) : false;
       return {
         ...p,
         has_liked: !!liked,
-        // distance is already in meters from $geoNear
       };
     }));
 
-    // [NEW] Inject 10 Random Seed Posts (Empty State / Filler)
-    // Only inject if standard sort (not popular) or if feed is empty
-    if (sort !== 'popular') {
+    // Inject seed posts only on first page (no cursor), standard sort, no search query
+    if (sort !== 'popular' && !cursor && !q) {
       const randomSeeds = shuffle([...SEED_POSTS]).slice(0, 10).map((seed) => {
         return {
           _id: seed.post_id,
           post_id: seed.post_id,
           content: seed.content,
           topic: seed.topic,
-          city: city || 'Jakarta', // Fallback to current city context
+          city: city || 'Jakarta',
           gender: seed.gender,
           occupation: seed.occupation,
           likes: seed.likes,
@@ -89,7 +94,6 @@ const postsRoutes = async (fastify, options) => {
         };
       });
 
-      // Combined: Real Posts (Top) + Seed Posts (Bottom)
       return [...postsWithStatus, ...randomSeeds];
     }
 

@@ -22,6 +22,21 @@ function ProtectedRoute({ children }) {
     return children;
 }
 
+function AdminRoute({ children }) {
+    const [authed, setAuthed] = React.useState(() => sessionStorage.getItem('GOGON_ADMIN_AUTHED') === 'true');
+    if (!authed) {
+        const token = window.prompt('Masukkan admin token:');
+        const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || '@Polki890';
+        if (token === ADMIN_TOKEN) {
+            sessionStorage.setItem('GOGON_ADMIN_AUTHED', 'true');
+            setAuthed(true);
+        } else {
+            return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Courier Prime, monospace', color: '#8C8476' }}>Access denied.</div>;
+        }
+    }
+    return children;
+}
+
 // Layout for the mobile app experience
 const MobileLayout = () => (
     <div className="max-w-md mx-auto min-h-screen shadow-2xl overflow-hidden relative" style={{ backgroundColor: '#F5EFE8', fontFamily: 'Courier Prime, monospace' }}>
@@ -71,7 +86,7 @@ export default function App() {
                 </Route>
 
                 {/* Admin Dashboard - Full Desktop Width */}
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             </Routes>
         </BrowserRouter>
     );
