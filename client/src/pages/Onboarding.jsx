@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import useUserStore from '../store/userStore';
 
-const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Bali', 'Lainnya'];
+const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Jogja', 'Bali', 'Lainnya'];
 
 const TYPING_TEXT = 'GoGon';
 const TYPING_SPEED = 120;
