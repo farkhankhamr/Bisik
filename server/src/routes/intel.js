@@ -109,8 +109,9 @@ const intelRoutes = async (fastify, options) => {
 
         if (lat && long) {
             newIntel.location = { type: 'Point', coordinates: [parseFloat(long), parseFloat(lat)] };
-            // Note: distance_bucket should ideally be calculated relative to *viewer*, 
-            // but for storage we just defaulting. The *read* endpoint calculates it.
+        } else {
+            // Explicitly unset so the sparse 2dsphere index is not triggered on empty coords
+            newIntel.location = undefined;
         }
 
         await newIntel.save();

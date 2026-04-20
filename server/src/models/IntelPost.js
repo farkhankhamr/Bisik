@@ -31,9 +31,10 @@ const intelPostSchema = new mongoose.Schema({
     },
 
     // Geospatial for finding nearby intel (actual search)
+    // location is optional — only set when user shares coordinates
     location: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], index: '2dsphere' } // [longitude, latitude]
+        type: { type: String, enum: ['Point'] },
+        coordinates: { type: [Number] }
     },
 
     // Timestamps
@@ -76,5 +77,7 @@ const intelPostSchema = new mongoose.Schema({
 
 // Compound index for efficient querying
 intelPostSchema.index({ city: 1, status: 1, created_at: -1 });
+// Sparse 2dsphere index — only indexes documents that actually have coordinates
+intelPostSchema.index({ location: '2dsphere' }, { sparse: true });
 
 module.exports = mongoose.model('IntelPost', intelPostSchema);
