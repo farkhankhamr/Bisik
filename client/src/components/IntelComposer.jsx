@@ -95,14 +95,34 @@ export default function IntelComposer({ onClose }) {
             <div className="absolute inset-0" onClick={onClose} />
 
             <div className="relative bg-[#F5EFE8] rounded-t-2xl sm:rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto animate-slide-up"
-                style={{ fontFamily: 'Courier Prime, monospace' }}
+                style={{ fontFamily: 'DM Sans, sans-serif' }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center mb-6">
-                    <button onClick={handleBack} className="text-xs font-bold text-[#8C8476]">
+                <div className="flex items-center mb-6">
+                    <button onClick={handleBack} className="text-xs font-bold text-[#8C8476] w-20 text-left shrink-0">
                         {step !== 'select' ? '← Kembali' : ''}
                     </button>
-                    <button onClick={onClose} className="text-[#8C8476]">
+                    <div className="flex-1 text-center">
+                        {step === 'select' && (
+                            <span className="font-bold text-base text-[#1E1E1E]">Bagikan Info Sekitar</span>
+                        )}
+                        {step === 'deal' && (
+                            <span className="flex items-center justify-center gap-2 font-bold text-base text-[#E040FB]">
+                                <Tag size={16} /> Bagikan Deal
+                            </span>
+                        )}
+                        {step === 'headsup' && (
+                            <span className="flex items-center justify-center gap-2 font-bold text-base text-[#FFC107]">
+                                <AlertTriangle size={16} /> Pilih Situasi
+                            </span>
+                        )}
+                        {step === 'headsup-form' && (
+                            <span className="flex items-center justify-center gap-2 font-bold text-base text-[#FFC107]">
+                                <AlertTriangle size={16} /> Detail Situasi
+                            </span>
+                        )}
+                    </div>
+                    <button onClick={onClose} className="text-[#8C8476] w-20 flex justify-end shrink-0">
                         <X size={24} />
                     </button>
                 </div>
@@ -110,7 +130,6 @@ export default function IntelComposer({ onClose }) {
                 {/* Selection Step */}
                 {step === 'select' && (
                     <div className="space-y-4">
-                        <h3 className="font-bold text-lg text-[#1E1E1E] mb-4">Bagikan Info Sekitar</h3>
                         <button
                             onClick={() => setStep('deal')}
                             className="w-full p-4 bg-white border border-[#D4C8BC] rounded-xl flex items-center gap-4 hover:bg-[#EDE5DC] transition"
@@ -141,10 +160,6 @@ export default function IntelComposer({ onClose }) {
                 {/* Deal Form */}
                 {step === 'deal' && (
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#E040FB] font-bold">
-                            <Tag size={18} /> Bagikan Deal
-                        </div>
-
                         <div className="flex gap-3">
                             <Avatar anonId={anonId} gender={gender} />
                             <div className="flex-1">
@@ -213,9 +228,6 @@ export default function IntelComposer({ onClose }) {
                 {/* Heads-up Selection */}
                 {step === 'headsup' && (
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#FFC107] font-bold mb-4">
-                            <AlertTriangle size={18} /> Pilih Situasi
-                        </div>
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { id: 'RAME', label: 'Rame Banget', icon: '👥' },
@@ -240,10 +252,6 @@ export default function IntelComposer({ onClose }) {
                 {/* Heads-up Form */}
                 {step === 'headsup-form' && (
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#FFC107] font-bold">
-                            <AlertTriangle size={18} /> Detail Situasi
-                        </div>
-
                         <div className="flex gap-3">
                             <Avatar anonId={anonId} gender={gender} />
                             <div className="flex-1">

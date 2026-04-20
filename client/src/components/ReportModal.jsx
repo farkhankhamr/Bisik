@@ -33,7 +33,7 @@ export default function ReportModal({ postId, onClose, onSubmit }) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
                 <div className="bg-white rounded-2xl p-6 max-w-sm w-full border-2 border-[#1E1E1E]"
-                    style={{ fontFamily: 'Courier Prime, monospace', backgroundColor: '#F5EFE8' }}>
+                    style={{ fontFamily: 'DM Sans, sans-serif', backgroundColor: '#F5EFE8' }}>
                     <div className="w-12 h-12 bg-[#1E1E1E] rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-6 h-6 text-[#F5EFE8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -50,7 +50,7 @@ export default function ReportModal({ postId, onClose, onSubmit }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <div className="bg-[#F5EFE8] rounded-2xl p-6 max-w-md w-full border-2 border-[#1E1E1E]" style={{ fontFamily: 'Courier Prime, monospace' }}>
+            <div className="bg-[#F5EFE8] rounded-2xl p-6 max-w-md w-full border-2 border-[#1E1E1E]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-[#1E1E1E]">Laporkan</h2>
                     <button onClick={onClose} className="text-[#8C8476]">

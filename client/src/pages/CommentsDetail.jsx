@@ -61,7 +61,7 @@ export default function CommentsDetail() {
                 <button onClick={() => navigate(-1)} className="p-1">
                     <ArrowLeft className="w-6 h-6" style={{ color: '#1E1E1E' }} />
                 </button>
-                <h1 className="text-lg font-bold" style={{ color: '#1E1E1E', fontFamily: 'Courier Prime, monospace' }}>Komentar</h1>
+                <h1 className="text-lg font-bold" style={{ color: '#1E1E1E', fontFamily: 'DM Sans, sans-serif' }}>Komentar</h1>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -70,34 +70,34 @@ export default function CommentsDetail() {
                     <div className="p-4 rounded-2xl mb-8"
                         style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0D5CA' }}>
                         <p className="pb-2 mb-2 font-bold"
-                            style={{ fontSize: '10px', textTransform: 'uppercase', color: '#8C8476', fontFamily: 'Courier Prime, monospace', borderBottom: '1px solid #E0D5CA' }}>
+                            style={{ fontSize: '10px', textTransform: 'uppercase', color: '#8C8476', fontFamily: 'DM Sans, sans-serif', borderBottom: '1px solid #E0D5CA' }}>
                             POSTINGAN ASLI
                         </p>
-                        <p className="whitespace-pre-wrap" style={{ fontSize: '14px', color: '#1E1E1E', fontFamily: 'Courier Prime, monospace' }}>{post.content}</p>
+                        <p className="whitespace-pre-wrap" style={{ fontSize: '14px', color: '#1E1E1E', fontFamily: 'DM Sans, sans-serif' }}>{post.content}</p>
                     </div>
                 )}
 
                 {/* Comments List */}
                 <div className="space-y-4 pb-20">
                     {loading ? (
-                        <p className="text-center py-10" style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>Memuat komentar...</p>
+                        <p className="text-center py-10" style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>Memuat komentar...</p>
                     ) : comments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20">
                             <MessageSquare className="w-12 h-12 mb-2" style={{ opacity: 0.4, color: '#8C8476' }} />
-                            <p style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>Belum ada komentar. Jadi yang pertama!</p>
+                            <p style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>Belum ada komentar. Jadi yang pertama!</p>
                         </div>
                     ) : (
                         comments.map((comment, idx) => (
                             <div key={idx} className="flex gap-3">
                                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                                    style={{ backgroundColor: '#EDE5DC', border: '1px solid #C4B8AC', color: '#5A4E3D', fontSize: '10px', fontWeight: 'bold', fontFamily: 'Courier Prime, monospace' }}>
+                                    style={{ backgroundColor: '#EDE5DC', border: '1px solid #C4B8AC', color: '#5A4E3D', fontSize: '10px', fontWeight: 'bold', fontFamily: 'DM Sans, sans-serif' }}>
                                     {(comment.anon_id || '??').substring(0, 2).toUpperCase()}
                                 </div>
                                 <div className="p-3 rounded-2xl flex-1"
                                     style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0D5CA' }}>
-                                    <p style={{ fontSize: '14px', color: '#1E1E1E', fontFamily: 'Courier Prime, monospace' }}>{comment.content}</p>
+                                    <p style={{ fontSize: '14px', color: '#1E1E1E', fontFamily: 'DM Sans, sans-serif' }}>{comment.content}</p>
                                     <p className="mt-1 uppercase font-bold"
-                                        style={{ fontSize: '10px', color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                                        style={{ fontSize: '10px', color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                                         {new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </div>
@@ -120,7 +120,7 @@ export default function CommentsDetail() {
                         style={{
                             backgroundColor: '#FFFFFF',
                             border: '1.5px solid #D4C8BC',
-                            fontFamily: 'Courier Prime, monospace',
+                            fontFamily: 'DM Sans, sans-serif',
                             color: '#2A241D',
                             '--placeholder-color': '#8C8476',
                         }}

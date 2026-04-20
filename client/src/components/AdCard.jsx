@@ -10,7 +10,7 @@ export default function AdCard({ ad }) {
     };
 
     return (
-        <div className="bg-[#EDE5DC]/30 p-4 border-b border-[#E0D5CA]" style={{ fontFamily: 'Courier Prime, monospace' }}>
+        <div className="bg-[#EDE5DC]/30 p-4 border-b border-[#E0D5CA]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
             {/* Disponsori Label */}
             <span className="text-[10px] font-bold text-[#8C8476] block mb-2 uppercase tracking-widest">
                 Disponsori

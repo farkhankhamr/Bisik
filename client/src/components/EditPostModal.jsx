@@ -21,7 +21,7 @@ export default function EditPostModal({ post, onClose, onSave }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <div className="bg-[#F5EFE8] rounded-2xl p-6 max-w-md w-full border-2 border-[#1E1E1E]" style={{ fontFamily: 'Courier Prime, monospace' }}>
+            <div className="bg-[#F5EFE8] rounded-2xl p-6 max-w-md w-full border-2 border-[#1E1E1E]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-[#1E1E1E]">Edit GoGon</h2>
                     <button onClick={onClose} className="text-[#8C8476]">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useFeedStore from '../store/feedStore';
 import useUserStore from '../store/userStore';
 import PostCard from '../components/PostCard';
@@ -6,7 +7,7 @@ import AdCard from '../components/AdCard';
 import DealCard from '../components/DealCard';
 import HeadsUpCard from '../components/HeadsUpCard';
 import IntelComposer from '../components/IntelComposer';
-import { Search, Megaphone, Loader2 } from 'lucide-react';
+import { Search, Megaphone, Loader2, Home } from 'lucide-react';
 import WelcomeModal from '../components/WelcomeModal';
 import Avatar from '../components/Avatar';
 
@@ -20,16 +21,24 @@ const PROMPTS = [
     "Lagi ngerasa apa?",
 ];
 
+// TODO: Replace MOCK_ADS with Google AdSense when ready.
+// To integrate AdSense:
+//   1. Add your AdSense script to index.html: <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+//   2. Replace <AdCard> in the feed with <ins class="adsbygoogle"> units (see AdCard.jsx for slot placement)
+//   3. Update AdCard.jsx to render an AdSense <ins> unit instead of static ad data
+//   4. Remove MOCK_ADS and the static ad injection logic below
+const SIZZLR_URL = 'https://www.instagram.com/sizzlr.id?igsh=OXFoYjdlb2F6MWpo';
 const MOCK_ADS = [
-    { id: 'ad_001', title: 'Capek kerja? Cari ruang aman buat cerita', description: 'Ruang diskusi & tools yang bisa kamu akses kapan saja.', cta: 'Pelajari', url: 'https://example.com' },
-    { id: 'ad_002', title: 'Banyak orang lagi mikirin kariernya', description: 'Bukan solusi instan, tapi bisa bantu lebih tenang.', cta: 'Pelajari', url: 'https://example.com' },
-    { id: 'ad_003', title: 'Belajar atur keuangan tanpa ribet', description: 'Baca dulu, nggak perlu daftar.', cta: 'Pelajari', url: 'https://example.com' },
-    { id: 'ad_004', title: 'Bacaan ringan soal kerja & hidup', description: 'Kalau kamu lagi butuh perspektif lain.', cta: 'Pelajari', url: 'https://example.com' }
+    { id: 'ad_001', title: 'Capek kerja? Cari ruang aman buat cerita', description: 'Ruang diskusi & tools yang bisa kamu akses kapan saja.', cta: 'Pelajari', url: SIZZLR_URL },
+    { id: 'ad_002', title: 'Banyak orang lagi mikirin kariernya', description: 'Bukan solusi instan, tapi bisa bantu lebih tenang.', cta: 'Pelajari', url: SIZZLR_URL },
+    { id: 'ad_003', title: 'Belajar atur keuangan tanpa ribet', description: 'Baca dulu, nggak perlu daftar.', cta: 'Pelajari', url: SIZZLR_URL },
+    { id: 'ad_004', title: 'Bacaan ringan soal kerja & hidup', description: 'Kalau kamu lagi butuh perspektif lain.', cta: 'Pelajari', url: SIZZLR_URL }
 ];
 
 export default function Feed() {
     const { posts, intel, myPosts, loading, hasMore, loadingMore, fetchPosts, fetchIntel, fetchMorePosts, searchPosts, addPost } = useFeedStore();
     const { city, anonId, gender, occupation, location } = useUserStore();
+    const navigate = useNavigate();
 
     const [showIntelComposer, setShowIntelComposer] = useState(false);
     const [content, setContent] = useState('');
@@ -119,19 +128,6 @@ export default function Feed() {
         }
     };
 
-    // Render content with overflow highlighted in red
-    const renderContentPreview = () => {
-        if (charCount <= MAX_CHARS) return null;
-        const safe = content.substring(0, MAX_CHARS);
-        const overflow = content.substring(MAX_CHARS);
-        return (
-            <div className="absolute inset-0 p-3 text-sm pointer-events-none whitespace-pre-wrap break-words"
-                style={{ fontFamily: 'Courier Prime, monospace', color: 'transparent' }}>
-                <span>{safe}</span>
-                <span style={{ backgroundColor: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>{overflow}</span>
-            </div>
-        );
-    };
 
     const mixedFeed = useMemo(() => {
         let filteredPosts = posts;
@@ -154,7 +150,15 @@ export default function Feed() {
             <header className="sticky top-0 z-10" style={{ backgroundColor: '#F5EFE8', borderBottom: '1px solid #E0D5CA' }}>
                 {/* Title row */}
                 <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                    <div className="w-8" />
+                    <button
+                        type="button"
+                        onClick={() => navigate('/onboarding')}
+                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
+                        style={{ backgroundColor: '#EDE5DC' }}
+                        title="Ubah Profil"
+                    >
+                        <Home size={15} style={{ color: '#5A4E3D' }} />
+                    </button>
                     <button
                         onClick={() => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -169,19 +173,11 @@ export default function Feed() {
                             }
                         }}
                         className="text-xl font-bold text-center cursor-pointer transition-opacity hover:opacity-70"
-                        style={{ color: '#1E1E1E', fontFamily: 'Courier Prime, monospace' }}
+                        style={{ color: '#1E1E1E' }}
                     >
                         GoGon
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => setShowIntelComposer(true)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
-                        style={{ backgroundColor: '#E0D5CA' }}
-                        title="Bagikan Info"
-                    >
-                        <Megaphone size={14} style={{ color: '#5A4E3D' }} />
-                    </button>
+                    <div className="w-8" />
                 </div>
 
                 {/* Search bar */}
@@ -197,7 +193,7 @@ export default function Feed() {
                             onBlur={() => setSearchFocused(false)}
                             placeholder="Cari Gogon"
                             className="flex-1 bg-transparent text-sm outline-none border-none"
-                            style={{ fontFamily: 'Courier Prime, monospace', color: '#2A241D' }}
+                            style={{ fontFamily: 'DM Sans, sans-serif', color: '#2A241D' }}
                         />
                     </div>
                 </div>
@@ -210,7 +206,7 @@ export default function Feed() {
                             onClick={() => setActiveTab(tab)}
                             className="px-3 py-1 text-xs font-bold rounded-full transition-all"
                             style={{
-                                fontFamily: 'Courier Prime, monospace',
+                                fontFamily: 'DM Sans, sans-serif',
                                 backgroundColor: activeTab === tab ? '#1E1E1E' : 'transparent',
                                 color: activeTab === tab ? '#F5EFE8' : '#8C8476',
                             }}
@@ -229,7 +225,7 @@ export default function Feed() {
                                 onClick={() => setFilterChip(chip)}
                                 className="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all"
                                 style={{
-                                    fontFamily: 'Courier Prime, monospace',
+                                    fontFamily: 'DM Sans, sans-serif',
                                     backgroundColor: filterChip === chip ? '#1E1E1E' : '#EDE5DC',
                                     color: filterChip === chip ? '#F5EFE8' : '#8C8476',
                                     border: filterChip === chip ? '1px solid #1E1E1E' : '1px solid transparent',
@@ -245,13 +241,13 @@ export default function Feed() {
             {/* Success Toast */}
             {showSuccess && (
                 <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-bold shadow-lg animate-bounce-in"
-                    style={{ backgroundColor: '#1E1E1E', color: '#F5EFE8', fontFamily: 'Courier Prime, monospace' }}>
+                    style={{ backgroundColor: '#1E1E1E', color: '#F5EFE8', fontFamily: 'DM Sans, sans-serif' }}>
                     ✓ GoGon terkirim!
                 </div>
             )}
 
             {/* Feed List */}
-            <div className="flex-1 pb-40">
+            <div className="flex-1 pb-52">
                 {loading && mixedFeed.length === 0 ? (
                     <div className="flex justify-center p-8" style={{ color: '#8C8476' }}>
                         <Loader2 className="animate-spin" />
@@ -276,7 +272,7 @@ export default function Feed() {
                     <div className="p-12 text-center">
                         <div className="text-4xl mb-4 opacity-40">🤫</div>
                         <p className="text-sm leading-relaxed max-w-[200px] mx-auto"
-                            style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                            style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                             {activeTab === 'all'
                                 ? 'Belum ada yang GoGon di sini. Jadilah yang pertama!'
                                 : 'Kamu belum ada aktivitas.'}
@@ -294,7 +290,7 @@ export default function Feed() {
                 )}
 
                 {!hasMore && mixedFeed.length > 0 && (
-                    <p className="text-center py-4" style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace', fontSize: '13px' }}>
+                    <p className="text-center py-4" style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif', fontSize: '13px' }}>
                         Udah semua nih 🤫
                     </p>
                 )}
@@ -309,7 +305,7 @@ export default function Feed() {
                     type="button"
                     onClick={() => setShowIntelComposer(true)}
                     className="w-full flex items-center justify-between px-4 py-2 mb-2"
-                    style={{ backgroundColor: '#EDE5DC', borderBottom: '1px solid #D4C8BC', fontFamily: 'Courier Prime, monospace' }}
+                    style={{ backgroundColor: '#EDE5DC', borderBottom: '1px solid #D4C8BC', fontFamily: 'DM Sans, sans-serif' }}
                 >
                     <span className="flex items-center gap-2 text-xs font-bold" style={{ color: '#5A4E3D' }}>
                         <Megaphone size={12} /> Bagikan info sekitar
@@ -327,9 +323,6 @@ export default function Feed() {
                                 border: isOverLimit ? '1.5px solid #ef4444' : '1.5px solid #D4C8BC',
                             }}
                         >
-                            {/* Overlay highlighting overflow */}
-                            {renderContentPreview()}
-
                             <textarea
                                 ref={textareaRef}
                                 value={content}
@@ -339,8 +332,8 @@ export default function Feed() {
                                 rows={content.length > 60 ? 4 : 2}
                                 className="w-full p-3 text-sm outline-none border-none resize-none bg-transparent relative z-10"
                                 style={{
-                                    fontFamily: 'Courier Prime, monospace',
-                                    color: isOverLimit ? '#2A241D' : '#2A241D',
+                                    fontFamily: 'DM Sans, sans-serif',
+                                    color: isOverLimit ? '#ef4444' : '#2A241D',
                                     minHeight: '52px',
                                     caretColor: '#1E1E1E',
                                 }}
@@ -349,11 +342,11 @@ export default function Feed() {
                             {/* Bottom row: counter + Kirim */}
                             <div className="flex items-center justify-between px-3 pb-2.5 pt-0">
                                 {isOverLimit ? (
-                                    <span className="text-xs font-bold" style={{ color: '#ef4444', fontFamily: 'Courier Prime, monospace' }}>
+                                    <span className="text-xs font-bold" style={{ color: '#ef4444', fontFamily: 'DM Sans, sans-serif' }}>
                                         Maksimum {MAX_CHARS} character ({charCount - MAX_CHARS > 0 ? '-' : ''}{Math.abs(charCount - MAX_CHARS)})
                                     </span>
                                 ) : (
-                                    <span className="text-xs" style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                                    <span className="text-xs" style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                                         {charCount}/{MAX_CHARS}
                                     </span>
                                 )}
@@ -363,7 +356,7 @@ export default function Feed() {
                                     disabled={!canSubmit}
                                     className="px-4 py-1.5 rounded-xl text-sm font-bold transition-all"
                                     style={{
-                                        fontFamily: 'Courier Prime, monospace',
+                                        fontFamily: 'DM Sans, sans-serif',
                                         backgroundColor: canSubmit ? '#1E1E1E' : '#C4B8AC',
                                         color: '#F5EFE8',
                                     }}

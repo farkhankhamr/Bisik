@@ -39,17 +39,17 @@ export default function HeadsUpCard({ intel }) {
                     <span className="bg-[#FFC107]/10 text-[#FFC107] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide flex items-center gap-1">
                         <AlertTriangle size={10} /> Heads-up
                     </span>
-                    <span className="text-[10px] text-[#8C8476]" style={{ fontFamily: 'Courier Prime, monospace' }}>
+                    <span className="text-[10px] text-[#8C8476]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         {intel.distance_bucket || 'Nearby'} • {formatDistanceToNow(new Date(intel.created_at), { addSuffix: true, locale: id })}
                     </span>
-                    <span className="text-[10px] text-[#FFC107] font-bold ml-auto" style={{ fontFamily: 'Courier Prime, monospace' }}>
+                    <span className="text-[10px] text-[#FFC107] font-bold ml-auto" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         Hilang {timeLeft} lagi
                     </span>
                 </div>
 
                 {/* Dashed border card for content */}
                 <div className="card-dashed px-4 py-3 mb-1.5 border-amber-400">
-                    <p className="text-sm font-bold leading-relaxed" style={{ color: '#2A241D', fontFamily: 'Courier Prime, monospace' }}>
+                    <p className="text-sm font-bold leading-relaxed" style={{ color: '#2A241D', fontFamily: 'DM Sans, sans-serif' }}>
                         {intel.content}
                     </p>
                 </div>
@@ -60,7 +60,7 @@ export default function HeadsUpCard({ intel }) {
                         onClick={handleAck}
                         disabled={isAcked}
                         className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition ${isAcked ? 'bg-[#FFC107]/20 text-[#FFC107]' : 'bg-[#EDE5DC] text-[#8C8476] hover:bg-[#D4C8BC]'}`}
-                        style={{ fontFamily: 'Courier Prime, monospace' }}
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}
                     >
                         <CheckCircle size={14} />
                         {isAcked ? 'Oke!' : 'Oke'}
@@ -70,7 +70,7 @@ export default function HeadsUpCard({ intel }) {
                     <button
                         onClick={handleUpdate}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-[#EDE5DC] text-[#5A4E3D] hover:bg-[#D4C8BC] transition"
-                        style={{ fontFamily: 'Courier Prime, monospace' }}
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}
                     >
                         <RefreshCcw size={14} />
                         Masih Ada?

@@ -1,13 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import useUserStore from '../store/userStore';
 
-const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Bali', 'Medan'];
+const CITIES = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Bali', 'Lainnya'];
+
+const TYPING_TEXT = 'GoGon';
+const TYPING_SPEED = 120;
+const DELETING_SPEED = 80;
+const PAUSE_AFTER_TYPE = 1800;
+const PAUSE_AFTER_DELETE = 400;
+
+function useTypingAnimation() {
+    const [displayed, setDisplayed] = useState('');
+    const [phase, setPhase] = useState('typing'); // typing | pausing | deleting | waiting
+    const timeoutRef = useRef(null);
+
+    useEffect(() => {
+        const tick = () => {
+            if (phase === 'typing') {
+                setDisplayed(prev => {
+                    const next = TYPING_TEXT.slice(0, prev.length + 1);
+                    if (next === TYPING_TEXT) {
+                        timeoutRef.current = setTimeout(() => setPhase('deleting'), PAUSE_AFTER_TYPE);
+                    } else {
+                        timeoutRef.current = setTimeout(tick, TYPING_SPEED);
+                    }
+                    return next;
+                });
+            } else if (phase === 'deleting') {
+                setDisplayed(prev => {
+                    const next = prev.slice(0, -1);
+                    if (next === '') {
+                        timeoutRef.current = setTimeout(() => setPhase('typing'), PAUSE_AFTER_DELETE);
+                    } else {
+                        timeoutRef.current = setTimeout(tick, DELETING_SPEED);
+                    }
+                    return next;
+                });
+            }
+        };
+        timeoutRef.current = setTimeout(tick, TYPING_SPEED);
+        return () => clearTimeout(timeoutRef.current);
+    }, [phase]);
+
+    return displayed;
+}
 const OCCUPATIONS = ['Mahasiswa', 'Karyawan', 'Pimpinan', 'Freelance', 'Lainnya'];
 const GENDERS = [{ id: 'M', label: 'Pria' }, { id: 'F', label: 'Wanita' }, { id: 'NB', label: 'Non-biner' }];
 
 export default function Onboarding() {
+    const typedTitle = useTypingAnimation();
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedOccupation, setSelectedOccupation] = useState('');
     const [selectedGender, setSelectedGender] = useState('');
@@ -51,10 +94,10 @@ export default function Onboarding() {
             <div className="max-w-md w-full space-y-6">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <h1 className="text-5xl font-bold mb-2" style={{ color: '#1E1E1E', fontFamily: 'Courier Prime, monospace' }}>
-                        GoGon
+                    <h1 className="text-5xl font-bold mb-2" style={{ color: '#1E1E1E', fontFamily: 'DM Sans, sans-serif' }}>
+                        {typedTitle}<span className="animate-pulse">|</span>
                     </h1>
-                    <p className="text-sm" style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                    <p className="text-sm" style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                         Tempat ngomong jujur, tanpa nama.
                     </p>
                 </div>
@@ -71,7 +114,7 @@ export default function Onboarding() {
                         style={{
                             border: locationStatus === 'granted' ? '1.5px solid #4CAF50' : '1.5px dashed #C4B8AC',
                             color: locationStatus === 'granted' ? '#4CAF50' : locationStatus === 'denied' ? '#ef4444' : '#7c5a41',
-                            fontFamily: 'Courier Prime, monospace',
+                            fontFamily: 'DM Sans, sans-serif',
                             backgroundColor: locationStatus === 'granted' ? '#f0fdf4' : 'transparent',
                         }}
                     >
@@ -90,7 +133,7 @@ export default function Onboarding() {
                     {/* City */}
                     <div>
                         <label className="block text-xs font-bold mb-2 uppercase tracking-widest"
-                            style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                            style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                             Pilih Kota Kamu
                         </label>
                         <div className="grid grid-cols-3 gap-2">
@@ -100,7 +143,7 @@ export default function Onboarding() {
                                     onClick={() => setSelectedCity(city)}
                                     className="p-2.5 rounded-lg text-sm font-medium transition-all"
                                     style={{
-                                        fontFamily: 'Courier Prime, monospace',
+                                        fontFamily: 'DM Sans, sans-serif',
                                         backgroundColor: selectedCity === city ? '#1E1E1E' : '#F5EFE8',
                                         color: selectedCity === city ? '#F5EFE8' : '#5A4E3D',
                                         border: selectedCity === city ? '1px solid #1E1E1E' : '1px solid #D4C8BC',
@@ -116,13 +159,13 @@ export default function Onboarding() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold mb-2 uppercase tracking-widest"
-                                style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                                style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                                 Gender
                             </label>
                             <select
                                 className="w-full p-2.5 rounded-lg text-sm border"
                                 style={{
-                                    fontFamily: 'Courier Prime, monospace',
+                                    fontFamily: 'DM Sans, sans-serif',
                                     backgroundColor: '#F5EFE8',
                                     borderColor: '#D4C8BC',
                                     color: '#2A241D'
@@ -138,13 +181,13 @@ export default function Onboarding() {
                         </div>
                         <div>
                             <label className="block text-xs font-bold mb-2 uppercase tracking-widest"
-                                style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}>
+                                style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}>
                                 Pekerjaan
                             </label>
                             <select
                                 className="w-full p-2.5 rounded-lg text-sm border"
                                 style={{
-                                    fontFamily: 'Courier Prime, monospace',
+                                    fontFamily: 'DM Sans, sans-serif',
                                     backgroundColor: '#F5EFE8',
                                     borderColor: '#D4C8BC',
                                     color: '#2A241D'
@@ -166,7 +209,7 @@ export default function Onboarding() {
                         disabled={!selectedCity}
                         className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-40"
                         style={{
-                            fontFamily: 'Courier Prime, monospace',
+                            fontFamily: 'DM Sans, sans-serif',
                             backgroundColor: '#1E1E1E',
                             color: '#F5EFE8',
                         }}

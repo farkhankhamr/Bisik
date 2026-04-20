@@ -40,17 +40,17 @@ export default function DealCard({ intel }) {
                     <span className="bg-[#E040FB]/10 text-[#E040FB] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide flex items-center gap-1">
                         <Tag size={10} /> Deal
                     </span>
-                    <span className="text-[10px] text-[#8C8476]" style={{ fontFamily: 'Courier Prime, monospace' }}>
+                    <span className="text-[10px] text-[#8C8476]" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         {intel.distance_bucket || 'Nearby'} • {formatDistanceToNow(new Date(intel.created_at), { addSuffix: true, locale: id })}
                     </span>
-                    <span className="text-[10px] text-[#E040FB] font-bold ml-auto" style={{ fontFamily: 'Courier Prime, monospace' }}>
+                    <span className="text-[10px] text-[#E040FB] font-bold ml-auto" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         Berlaku: {validUntil}
                     </span>
                 </div>
 
                 {/* Dashed border card for content */}
                 <div className="card-dashed px-4 py-3 mb-1.5">
-                    <p className="text-sm font-bold leading-relaxed" style={{ color: '#2A241D', fontFamily: 'Courier Prime, monospace' }}>
+                    <p className="text-sm font-bold leading-relaxed" style={{ color: '#2A241D', fontFamily: 'DM Sans, sans-serif' }}>
                         {intel.content}
                     </p>
                 </div>
@@ -60,7 +60,7 @@ export default function DealCard({ intel }) {
                     <button
                         onClick={handleSave}
                         className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition ${isSaved ? 'bg-[#1E1E1E] text-[#F5EFE8]' : 'bg-[#EDE5DC] text-[#8C8476] hover:bg-[#D4C8BC]'}`}
-                        style={{ fontFamily: 'Courier Prime, monospace' }}
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}
                     >
                         <Bookmark size={14} className={isSaved ? 'fill-current' : ''} />
                         {isSaved ? 'Disimpan' : 'Simpan'}
@@ -70,7 +70,7 @@ export default function DealCard({ intel }) {
                     <button
                         onClick={handleDirection}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-[#EDE5DC] text-[#5A4E3D] hover:bg-[#D4C8BC] transition"
-                        style={{ fontFamily: 'Courier Prime, monospace' }}
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}
                     >
                         <MapPin size={14} />
                         Arah

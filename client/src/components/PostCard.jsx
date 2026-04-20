@@ -52,7 +52,7 @@ export default function PostCard({ post }) {
                 <div className="flex-1 min-w-0">
                     {/* Dashed border card for content */}
                     <div className="card-dashed px-4 py-3 mb-1.5">
-                        <p className="text-sm leading-relaxed" style={{ color: '#2A241D', fontFamily: 'Courier Prime, monospace' }}>
+                        <p className="text-sm leading-relaxed" style={{ color: '#2A241D', fontFamily: 'DM Sans, sans-serif' }}>
                             {post.content}
                         </p>
                     </div>
@@ -99,7 +99,7 @@ export default function PostCard({ post }) {
                         {/* Location • time */}
                         <span
                             className="text-xs"
-                            style={{ color: '#8C8476', fontFamily: 'Courier Prime, monospace' }}
+                            style={{ color: '#8C8476', fontFamily: 'DM Sans, sans-serif' }}
                         >
                             {locationDisplay} • {timeStr}
                         </span>
@@ -138,7 +138,7 @@ export default function PostCard({ post }) {
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
                     <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-[#E0D5CA]"
-                        style={{ fontFamily: 'Courier Prime, monospace' }}>
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         <h3 className="text-base font-bold text-[#2A241D] mb-2">Hapus Postingan?</h3>
                         <p className="text-sm text-[#8C8476] mb-6">
                             Postingan ini akan dihapus permanen.

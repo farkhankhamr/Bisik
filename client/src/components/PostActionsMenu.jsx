@@ -29,7 +29,7 @@ export default function PostActionsMenu({ post, currentUserId, onEdit, onDelete,
 
                     {/* Menu */}
                     <div className="absolute right-0 top-8 z-20 bg-white rounded-xl shadow-xl border-2 border-[#1E1E1E] py-1 min-w-[160px] overflow-hidden"
-                        style={{ fontFamily: 'Courier Prime, monospace' }}>
+                        style={{ fontFamily: 'DM Sans, sans-serif' }}>
                         {isOwnPost ? (
                             <>
                                 {canEdit && (
