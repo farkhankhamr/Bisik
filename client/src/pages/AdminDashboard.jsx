@@ -179,8 +179,10 @@ const DayDetailModal = ({ isOpen, onClose, data }) => {
 
 // --- Main Page ---
 
+const HARDCODED_TOKEN = '@Polki890';
+
 export default function AdminDashboard() {
-    const [token, setToken] = useState(localStorage.getItem('adminToken') || '');
+    const [token, setToken] = useState(localStorage.getItem('adminToken') || HARDCODED_TOKEN);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [summaries, setSummaries] = useState([]);
     const [selectedDay, setSelectedDay] = useState(null);
@@ -297,37 +299,10 @@ export default function AdminDashboard() {
         original: s // Carry full object for click handler
     }));
 
-    if (!isAuthenticated) {
+    if (loading && !isAuthenticated) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
-                <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-                    <div className="flex justify-center mb-6">
-                        <div className="bg-slate-900 text-white p-3 rounded-lg">
-                            <Shield className="w-6 h-6" />
-                        </div>
-                    </div>
-                    <h2 className="text-2xl font-semibold text-center text-slate-900 mb-2">GoGon Admin</h2>
-                    <p className="text-slate-500 text-center mb-6">Internal analytics access only.</p>
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div>
-                            <input
-                                type="password"
-                                value={token}
-                                onChange={(e) => setToken(e.target.value)}
-                                placeholder="Access Token"
-                                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
-                            />
-                        </div>
-                        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-slate-900 text-white py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
-                        >
-                            {loading ? 'Verifying...' : 'Access Dashboard'}
-                        </button>
-                    </form>
-                </div>
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <Loader2 className="animate-spin w-8 h-8 text-slate-400" />
             </div>
         );
     }
