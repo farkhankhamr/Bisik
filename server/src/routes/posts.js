@@ -22,10 +22,10 @@ const shuffle = (array) => {
 const postsCreateSchema = {
     body: {
         type: 'object',
-        required: ['content', 'city', 'anon_id'],
+        required: ['content', 'anon_id'],
         properties: {
             content:     { type: 'string', minLength: 1, maxLength: 150 },
-            city:        { type: 'string', minLength: 1, maxLength: 50 },
+            city:        { type: ['string', 'null'], maxLength: 50 },
             institution: { type: ['string', 'null'], maxLength: 100 },
             gender:      { type: ['string', 'null'], enum: ['Pria', 'Wanita', 'NB', null] },
             occupation:  { type: ['string', 'null'], maxLength: 50 },

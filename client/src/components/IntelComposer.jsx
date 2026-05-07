@@ -37,13 +37,10 @@ export default function IntelComposer({ onClose }) {
                 content: dealContent,
                 city,
                 anon_id: anonId,
-                lat: location?.lat,
-                long: location?.long,
-                deal_meta: {
-                    validity_preset: validity,
-                    place_hint: placeHint,
-                    seen_directly: seenDirectly
-                }
+                lat: location?.lat ?? null,
+                long: location?.long ?? null,
+                validity_preset: validity,
+                place_hint: placeHint ?? null,
             });
             onClose();
         } catch (err) {
@@ -77,11 +74,9 @@ export default function IntelComposer({ onClose }) {
                 content: headsUpContent,
                 city,
                 anon_id: anonId,
-                lat: location?.lat,
-                long: location?.long,
-                headsup_meta: {
-                    heads_up_type: headsUpType
-                }
+                lat: location?.lat ?? null,
+                long: location?.long ?? null,
+                heads_up_type: headsUpType,
             });
             onClose();
         } catch (err) {

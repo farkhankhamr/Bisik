@@ -56,11 +56,11 @@ const calculateExpiry = (type, preset) => {
 const intelCreateSchema = {
     body: {
         type: 'object',
-        required: ['type', 'content', 'city', 'anon_id'],
+        required: ['type', 'content', 'anon_id'],
         properties: {
             type:            { type: 'string', enum: ['DEAL', 'HEADSUP'] },
             content:         { type: 'string', minLength: 1, maxLength: 200 },
-            city:            { type: 'string', minLength: 1, maxLength: 50 },
+            city:            { type: ['string', 'null'], maxLength: 50 },
             anon_id:         { type: 'string', minLength: 8, maxLength: 64 },
             validity_preset: { type: ['string', 'null'], enum: ['TODAY', 'TOMORROW', 'WEEKEND', '48H', null] },
             heads_up_type:   { type: ['string', 'null'], enum: ['RAME', 'ANTRI', 'TUTUP', 'PARKIR_SUSAH', 'BISING', null] },
@@ -76,7 +76,7 @@ const intelRoutes = async (fastify, options) => {
 
     // POST /intel - Create new intel
     fastify.post('/intel', { config: { rateLimit: { max: 3, timeWindow: '15 minutes' } }, schema: intelCreateSchema }, async (request, reply) => {
-        const { type, content, city, area, anon_id, lat, long, deal_meta, headsup_meta } = request.body;
+        const { type, content, city, anon_id, lat, long, validity_preset, heads_up_type, place_hint } = request.body;
 
         // 1. Validation
         if (!content || !type || !anon_id) {
@@ -85,6 +85,14 @@ const intelRoutes = async (fastify, options) => {
 
         if (content.length > 160) {
             return reply.code(400).send({ error: 'Content too long' });
+        }
+
+        if (type === 'DEAL' && !validity_preset) {
+            return reply.code(400).send({ error: 'validity_preset is required for DEAL' });
+        }
+
+        if (type === 'HEADSUP' && !heads_up_type) {
+            return reply.code(400).send({ error: 'heads_up_type is required for HEADSUP' });
         }
 
         // 2. Spam Check
@@ -111,20 +119,23 @@ const intelRoutes = async (fastify, options) => {
         }
 
         // 4. Expiry Calculation
-        const expires_at = calculateExpiry(type, deal_meta?.validity_preset);
+        const expires_at = calculateExpiry(type, validity_preset);
 
-        // 5. Create Post
+        // 5. Build nested meta objects from flat fields
+        const deal_meta = type === 'DEAL' ? { validity_preset, place_hint: place_hint || null, seen_directly: true } : undefined;
+        const headsup_meta = type === 'HEADSUP' ? { heads_up_type } : undefined;
+
+        // 6. Create Post
         const newIntel = new IntelPost({
             type,
             content,
             city: city || 'Unknown',
-            area,
             anon_id,
             expires_at,
             metrics: { saves: 0, ack: 0 },
             distance_bucket: 'NEARBY', // Default fallback
-            deal_meta: type === 'DEAL' ? deal_meta : undefined,
-            headsup_meta: type === 'HEADSUP' ? headsup_meta : undefined
+            deal_meta,
+            headsup_meta
         });
 
         if (lat && long) {
