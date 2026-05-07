@@ -1,6 +1,20 @@
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 
+
+const commentCreateSchema = {
+    body: {
+        type: 'object',
+        required: ['content', 'anon_id'],
+        properties: {
+            content: { type: 'string', minLength: 1, maxLength: 300 },
+            anon_id: { type: 'string', minLength: 8, maxLength: 64 },
+            gender:  { type: ['string', 'null'], enum: ['M', 'F', 'NB', null] }
+        },
+        additionalProperties: false
+    }
+};
+
 async function commentsRoutes(fastify, options) {
     // GET /posts/:id/comments - Get comments for a post
     fastify.get('/posts/:id/comments', async (request, reply) => {
@@ -10,7 +24,7 @@ async function commentsRoutes(fastify, options) {
     });
 
     // POST /posts/:id/comments - Create Comment
-    fastify.post('/posts/:id/comments', async (request, reply) => {
+    fastify.post('/posts/:id/comments', { config: { rateLimit: { max: 10, timeWindow: '5 minutes' } }, schema: commentCreateSchema }, async (request, reply) => {
         const { id } = request.params;
         const { content, anon_id, gender } = request.body;
 

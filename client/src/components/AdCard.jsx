@@ -1,3 +1,4 @@
+import { safeUrl } from '../utils/safeUrl';
 import React from 'react';
 
 export default function AdCard({ ad }) {
@@ -5,7 +6,7 @@ export default function AdCard({ ad }) {
         // Track ad click (analytics event)
         console.log('Ad clicked:', ad.id);
         if (ad.url) {
-            window.open(ad.url, '_blank', 'noopener,noreferrer');
+            window.open(safeUrl(ad.url), '_blank', 'noopener,noreferrer');
         }
     };
 

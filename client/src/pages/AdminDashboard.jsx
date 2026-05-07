@@ -179,12 +179,11 @@ const DayDetailModal = ({ isOpen, onClose, data }) => {
 
 // --- Main Page ---
 
-const HARDCODED_TOKEN = '@Polki890';
 const ADMIN_API_URL = 'https://farkhankhamr-gogon-server.hf.space/api';
 
 export default function AdminDashboard() {
-    const [token, setToken] = useState(localStorage.getItem('adminToken') || HARDCODED_TOKEN);
-    const [isAuthenticated, setIsAuthenticated] = useState(true);
+    const [token, setToken] = useState(''); // raw admin token (only used for login exchange)
+    const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem('GOGON_ADMIN_JWT'));
     const [summaries, setSummaries] = useState([]);
     const [liveStats, setLiveStats] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
@@ -194,6 +193,11 @@ export default function AdminDashboard() {
     const [savingSetting, setSavingSetting] = useState(false);
     const [runningSummary, setRunningSummary] = useState(false);
 
+
+    const getAuthHeader = () => ({
+        'Authorization': `Bearer ${sessionStorage.getItem('GOGON_ADMIN_JWT') || ''}`
+    });
+
     // Initial Check — auto-auth + fetch everything on mount
     useEffect(() => {
         console.log('[AdminDashboard] Mounting. Token:', token);
@@ -202,21 +206,42 @@ export default function AdminDashboard() {
         fetchAdminSettings();
     }, []);
 
-    const verifyToken = async (t) => {
+    const verifyToken = async (rawToken) => {
         try {
             setLoading(true);
+            // Exchange raw token for JWT if we don't have one
+            if (!sessionStorage.getItem('GOGON_ADMIN_JWT')) {
+                const loginRes = await fetch(`${ADMIN_API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: rawToken })
+                });
+                if (!loginRes.ok) {
+                    setError('Invalid token');
+                    setIsAuthenticated(false);
+                    setLoading(false);
+                    return;
+                }
+                const loginData = await loginRes.json();
+                sessionStorage.setItem('GOGON_ADMIN_JWT', loginData.jwt);
+            }
+            // Now fetch summaries using JWT
             const res = await fetch(`${ADMIN_API_URL}/admin/summaries?limit=30`, {
-                headers: { 'x-admin-token': t }
+                headers: getAuthHeader()
             });
             if (res.ok) {
                 const data = await res.json();
                 const list = data.summaries || (Array.isArray(data) ? data : []);
                 setSummaries(list.sort((a, b) => a.day_index - b.day_index));
                 setIsAuthenticated(true);
-                localStorage.setItem('adminToken', t);
                 setError('');
+            } else if (res.status === 401) {
+                // JWT expired — clear and re-prompt
+                sessionStorage.removeItem('GOGON_ADMIN_JWT');
+                setError('Session expired');
+                setIsAuthenticated(false);
             } else {
-                setError('Invalid token');
+                setError('Connection failed');
                 setIsAuthenticated(false);
             }
         } catch (err) {
@@ -229,7 +254,7 @@ export default function AdminDashboard() {
     const fetchAdminSettings = async (t) => {
         try {
             const res = await fetch(`${ADMIN_API_URL}/admin/settings`, {
-                headers: { 'x-admin-token': t || token }
+                headers: getAuthHeader()
             });
             if (res.ok) {
                 const data = await res.json();
@@ -247,7 +272,7 @@ export default function AdminDashboard() {
     const fetchLiveStats = async () => {
         try {
             const res = await fetch(`${ADMIN_API_URL}/admin/live-stats`, {
-                headers: { 'x-admin-token': token }
+                headers: getAuthHeader()
             });
             console.log('[AdminDashboard] live-stats response status:', res.status);
             if (res.ok) {
@@ -268,7 +293,7 @@ export default function AdminDashboard() {
             setRunningSummary(true);
             const res = await fetch(`${ADMIN_API_URL}/admin/run-daily-summary`, {
                 method: 'POST',
-                headers: { 'x-admin-token': token, 'Content-Type': 'application/json' }
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' }
             });
             if (res.ok) {
                 verifyToken(token); // Refresh summaries
@@ -294,10 +319,7 @@ export default function AdminDashboard() {
             const newValue = !currentValue;
             const res = await fetch(`${ADMIN_API_URL}/admin/settings`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-admin-token': token
-                },
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value: newValue })
             });
             if (res.ok) {
@@ -314,6 +336,15 @@ export default function AdminDashboard() {
         e.preventDefault();
         verifyToken(token);
     };
+
+    // Auto-prompt on first load if not authenticated
+    React.useEffect(() => {
+        if (!isAuthenticated && !sessionStorage.getItem('GOGON_ADMIN_JWT')) {
+            const t = window.prompt('Masukkan admin token:');
+            if (t) { setToken(t); verifyToken(t); }
+            else setError('No token provided');
+        }
+    }, []);
 
     // --- Derived Metrics (Latest Day) ---
     const latest = summaries.length > 0 ? summaries[summaries.length - 1] : null;
@@ -389,7 +420,7 @@ export default function AdminDashboard() {
                         <span className="text-sm text-slate-500">{new Date().toLocaleDateString()}</span>
                         <button
                             onClick={() => {
-                                localStorage.removeItem('adminToken');
+                                sessionStorage.removeItem('GOGON_ADMIN_JWT');
                                 setIsAuthenticated(false);
                             }}
                             className="text-sm font-medium text-slate-600 hover:text-slate-900"
@@ -744,7 +775,7 @@ export default function AdminDashboard() {
                                                         try {
                                                             const res = await fetch(`${ADMIN_API_URL}/admin/retry-export/${s.dateKey}`, {
                                                                 method: 'POST',
-                                                                headers: { 'x-admin-token': token }
+                                                                headers: getAuthHeader()
                                                             });
                                                             if (res.ok) verifyToken(token); // Refresh
                                                         } catch (e) { console.error(e); }

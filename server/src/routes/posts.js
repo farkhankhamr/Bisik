@@ -18,6 +18,26 @@ const shuffle = (array) => {
   return array;
 };
 
+
+const postsCreateSchema = {
+    body: {
+        type: 'object',
+        required: ['content', 'city', 'anon_id'],
+        properties: {
+            content:     { type: 'string', minLength: 1, maxLength: 150 },
+            city:        { type: 'string', minLength: 1, maxLength: 50 },
+            institution: { type: ['string', 'null'], maxLength: 100 },
+            gender:      { type: ['string', 'null'], enum: ['Pria', 'Wanita', 'NB', null] },
+            occupation:  { type: ['string', 'null'], maxLength: 50 },
+            anon_id:     { type: 'string', minLength: 8, maxLength: 64 },
+            lat:         { type: ['number', 'null'], minimum: -90, maximum: 90 },
+            long:        { type: ['number', 'null'], minimum: -180, maximum: 180 },
+            topic:       { type: ['string', 'null'], maxLength: 50 }
+        },
+        additionalProperties: false
+    }
+};
+
 const postsRoutes = async (fastify, options) => {
   // GET /posts - Feed with geospatial filtering, cursor pagination, and search
   fastify.get('/posts', async (request, reply) => {
@@ -115,7 +135,7 @@ const postsRoutes = async (fastify, options) => {
   });
 
   // POST /posts - Create Post
-  fastify.post('/posts', async (request, reply) => {
+  fastify.post('/posts', { config: { rateLimit: { max: 5, timeWindow: '10 minutes' } }, schema: postsCreateSchema }, async (request, reply) => {
     const { content, city, institution, topic, gender, occupation, lat, long, anon_id } = request.body;
 
     if (!content || !anon_id) {

@@ -23,17 +23,30 @@ function ProtectedRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-    const [authed, setAuthed] = React.useState(() => sessionStorage.getItem('GOGON_ADMIN_AUTHED') === 'true');
-    if (!authed) {
-        const token = window.prompt('Masukkan admin token:');
-        const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || '@Polki890';
-        if (token === ADMIN_TOKEN) {
-            sessionStorage.setItem('GOGON_ADMIN_AUTHED', 'true');
-            setAuthed(true);
-        } else {
-            return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'DM Sans, sans-serif', color: '#8C8476' }}>Access denied.</div>;
-        }
-    }
+    const [authed, setAuthed] = React.useState(() => !!sessionStorage.getItem('GOGON_ADMIN_JWT'));
+    const [denied, setDenied] = React.useState(false);
+
+    React.useEffect(() => {
+        if (authed) return;
+        const rawToken = window.prompt('Masukkan admin token:');
+        if (!rawToken) { setDenied(true); return; }
+        const apiUrl = 'https://farkhankhamr-gogon-server.hf.space/api';
+        fetch(`${apiUrl}/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: rawToken })
+        }).then(r => r.json()).then(data => {
+            if (data.jwt) {
+                sessionStorage.setItem('GOGON_ADMIN_JWT', data.jwt);
+                setAuthed(true);
+            } else {
+                setDenied(true);
+            }
+        }).catch(() => setDenied(true));
+    }, []);
+
+    if (denied) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'DM Sans, sans-serif', color: '#8C8476' }}>Access denied.</div>;
+    if (!authed) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'DM Sans, sans-serif', color: '#8C8476' }}>Authenticating...</div>;
     return children;
 }
 

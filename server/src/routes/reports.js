@@ -3,10 +3,25 @@ const Post = require('../models/Post');
 const IntelPost = require('../models/IntelPost');
 const UserBan = require('../models/UserBan');
 
+
+const reportSchema = {
+    body: {
+        type: 'object',
+        required: ['target_id', 'target_type', 'anon_id', 'reason'],
+        properties: {
+            target_id:   { type: 'string', minLength: 8, maxLength: 64 },
+            target_type: { type: 'string', enum: ['POST', 'INTEL'] },
+            anon_id:     { type: 'string', minLength: 8, maxLength: 64 },
+            reason:      { type: 'string', minLength: 1, maxLength: 200 }
+        },
+        additionalProperties: false
+    }
+};
+
 const reportRoutes = async (fastify, options) => {
 
     // POST /report - General Report Endpoint
-    fastify.post('/report', async (request, reply) => {
+    fastify.post('/report', { config: { rateLimit: { max: 5, timeWindow: '1 hour' } }, schema: reportSchema }, async (request, reply) => {
         const { target_id, target_type, anon_id, reason } = request.body;
         // target_type: 'POST' or 'INTEL'
 

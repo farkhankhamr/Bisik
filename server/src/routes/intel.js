@@ -52,10 +52,30 @@ const calculateExpiry = (type, preset) => {
     }
 };
 
+
+const intelCreateSchema = {
+    body: {
+        type: 'object',
+        required: ['type', 'content', 'city', 'anon_id'],
+        properties: {
+            type:            { type: 'string', enum: ['DEAL', 'HEADSUP'] },
+            content:         { type: 'string', minLength: 1, maxLength: 200 },
+            city:            { type: 'string', minLength: 1, maxLength: 50 },
+            anon_id:         { type: 'string', minLength: 8, maxLength: 64 },
+            validity_preset: { type: ['string', 'null'], enum: ['TODAY', 'TOMORROW', 'WEEKEND', '48H', null] },
+            heads_up_type:   { type: ['string', 'null'], enum: ['RAME', 'ANTRI', 'TUTUP', 'PARKIR_SUSAH', 'BISING', null] },
+            place_hint:      { type: ['string', 'null'], enum: ['MALL', 'CAFE', 'RESTO', 'MINIMARKET', 'CAMPUS', 'OFFICE', 'OTHER', null] },
+            lat:             { type: ['number', 'null'], minimum: -90, maximum: 90 },
+            long:            { type: ['number', 'null'], minimum: -180, maximum: 180 }
+        },
+        additionalProperties: false
+    }
+};
+
 const intelRoutes = async (fastify, options) => {
 
     // POST /intel - Create new intel
-    fastify.post('/intel', async (request, reply) => {
+    fastify.post('/intel', { config: { rateLimit: { max: 3, timeWindow: '15 minutes' } }, schema: intelCreateSchema }, async (request, reply) => {
         const { type, content, city, area, anon_id, lat, long, deal_meta, headsup_meta } = request.body;
 
         // 1. Validation

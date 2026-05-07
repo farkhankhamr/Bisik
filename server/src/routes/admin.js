@@ -6,6 +6,8 @@
 const DailySummary = require('../models/DailySummary');
 const SystemSetting = require('../models/SystemSetting');
 const { generateDailySummary, getJakartaDateKey } = require('../utils/dailySummary');
+const jwt = require('jsonwebtoken');
+const requireAdmin = require('../middleware/requireAdmin');
 
 // Lazy load sheetsExport to avoid startup errors if credentials not configured
 let sheetsExport = null;
@@ -22,23 +24,33 @@ const getSheetsExport = () => {
 
 const adminRoutes = async (fastify, options) => {
 
-    // Middleware to check admin token
-    const checkAdminToken = async (request, reply) => {
-        const token = request.headers['x-admin-token'] || request.query.admin_token;
+    // POST /admin/login - Exchange admin token for JWT
+    fastify.post('/admin/login', {
+        config: { rateLimit: { max: 5, timeWindow: '15 minutes' } }
+    }, async (request, reply) => {
+        const { token } = request.body || {};
         const expectedToken = process.env.ADMIN_TOKEN;
 
         if (!expectedToken) {
             return reply.code(500).send({ error: 'ADMIN_TOKEN not configured' });
         }
 
-        if (token !== expectedToken) {
-            return reply.code(401).send({ error: 'Unauthorized' });
+        if (!token || token !== expectedToken) {
+            return reply.code(401).send({ error: 'invalid_token' });
         }
-    };
+
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            return reply.code(500).send({ error: 'JWT_SECRET not configured' });
+        }
+
+        const jwtToken = jwt.sign({ role: 'admin' }, jwtSecret, { expiresIn: '8h' });
+        return { jwt: jwtToken };
+    });
 
     // POST /admin/run-daily-summary - Trigger daily summary generation
     fastify.post('/admin/run-daily-summary', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const { dateKey } = request.body || {};
@@ -53,7 +65,6 @@ const adminRoutes = async (fastify, options) => {
             if (sheets && sheets.exportSummaryToSheets) {
                 try {
                     await sheets.exportSummaryToSheets(summary);
-                    // Update export status
                     await DailySummary.updateOne(
                         { _id: summary._id },
                         {
@@ -92,7 +103,7 @@ const adminRoutes = async (fastify, options) => {
 
     // POST /admin/retry-export/:dateKey - Retry Google Sheets export
     fastify.post('/admin/retry-export/:dateKey', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const { dateKey } = request.params;
@@ -140,7 +151,7 @@ const adminRoutes = async (fastify, options) => {
 
     // GET /admin/summaries - List recent summaries
     fastify.get('/admin/summaries', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const limit = parseInt(request.query.limit) || 14;
@@ -157,7 +168,7 @@ const adminRoutes = async (fastify, options) => {
 
     // GET /admin/summary/:dateKey - Get specific summary details
     fastify.get('/admin/summary/:dateKey', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const { dateKey } = request.params;
@@ -176,7 +187,7 @@ const adminRoutes = async (fastify, options) => {
 
     // GET /admin/live-stats - All-time + recent stats from DB
     fastify.get('/admin/live-stats', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const Post = require('../models/Post');
@@ -187,7 +198,7 @@ const adminRoutes = async (fastify, options) => {
             const since14d = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
             // Indonesian stopwords to filter from topic analysis
-            const STOPWORDS = new Set(['yang', 'dan', 'di', 'ke', 'dari', 'ini', 'itu', 'ada', 'ada', 'bisa', 'untuk', 'dengan', 'tidak', 'juga', 'lebih', 'tapi', 'atau', 'aku', 'kamu', 'dia', 'kita', 'mereka', 'kami', 'saya', 'sudah', 'sudah', 'jadi', 'kalau', 'sih', 'dong', 'deh', 'kan', 'nih', 'lagi', 'udah', 'mau', 'sama', 'nya', 'pun', 'aja', 'gue', 'lo', 'gak', 'nggak', 'banget', 'lah', 'yah', 'ya', 'mah', 'pada', 'akan', 'buat', 'atas', 'bawah', 'kalo', 'gimana', 'karena', 'ketika', 'dimana', 'kenapa', 'harus', 'boleh', 'punya', 'dari', 'dalam', 'oleh', 'saat', 'bila', 'jika', 'bahwa', 'masih', 'baru', 'paling', 'sangat', 'begitu', 'seperti', 'warga', 'orang', 'tempat', 'sana', 'sini', 'situ', 'nah', 'yg', 'dgn', 'utk', 'krn', 'sdh', 'blm', 'belum', 'juga', 'lalu', 'terus', 'habis', 'saja', 'mana', 'dong', 'deh']);
+            const STOPWORDS = new Set(['yang', 'dan', 'di', 'ke', 'dari', 'ini', 'itu', 'ada', 'bisa', 'untuk', 'dengan', 'tidak', 'juga', 'lebih', 'tapi', 'atau', 'aku', 'kamu', 'dia', 'kita', 'mereka', 'kami', 'saya', 'sudah', 'jadi', 'kalau', 'sih', 'dong', 'deh', 'kan', 'nih', 'lagi', 'udah', 'mau', 'sama', 'nya', 'pun', 'aja', 'gue', 'lo', 'gak', 'nggak', 'banget', 'lah', 'yah', 'ya', 'mah', 'pada', 'akan', 'buat', 'atas', 'bawah', 'kalo', 'gimana', 'karena', 'ketika', 'dimana', 'kenapa', 'harus', 'boleh', 'punya', 'dalam', 'oleh', 'saat', 'bila', 'jika', 'bahwa', 'masih', 'baru', 'paling', 'sangat', 'begitu', 'seperti', 'warga', 'orang', 'tempat', 'sana', 'sini', 'situ', 'nah', 'yg', 'dgn', 'utk', 'krn', 'sdh', 'blm', 'belum', 'lalu', 'terus', 'habis', 'saja', 'mana']);
 
             const [
                 totalPostsAllTime,
@@ -253,7 +264,6 @@ const adminRoutes = async (fastify, options) => {
                 reported: 0
             }));
 
-            // Filter stopwords and build topics
             const topics = wordAgg
                 .filter(w => !STOPWORDS.has(w._id) && w._id.length >= 4)
                 .slice(0, 10)
@@ -287,7 +297,7 @@ const adminRoutes = async (fastify, options) => {
 
     // GET /admin/settings - Retrieve all system settings
     fastify.get('/admin/settings', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const settings = await SystemSetting.find();
@@ -300,7 +310,7 @@ const adminRoutes = async (fastify, options) => {
 
     // POST /admin/settings - Update or create a system setting
     fastify.post('/admin/settings', {
-        preHandler: checkAdminToken
+        preHandler: requireAdmin
     }, async (request, reply) => {
         try {
             const { key, value } = request.body;

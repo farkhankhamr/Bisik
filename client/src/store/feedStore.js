@@ -130,7 +130,7 @@ const useFeedStore = create((set, get) => ({
         try {
             const res = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-anon-id': postData.anon_id || '' },
                 body: JSON.stringify(postData)
             });
 
@@ -173,7 +173,7 @@ const useFeedStore = create((set, get) => ({
         try {
             const res = await fetch(`${API_URL}/intel`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-anon-id': intelData.anon_id || '' },
                 body: JSON.stringify(intelData)
             });
 
@@ -302,7 +302,7 @@ const useFeedStore = create((set, get) => ({
         try {
             const res = await fetch(`${API_URL}/report`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-anon-id': anonId || '' },
                 body: JSON.stringify({
                     target_id: targetId,
                     target_type: targetType,
@@ -351,7 +351,7 @@ const useFeedStore = create((set, get) => ({
             const { gender } = useUserStore.getState();
             const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-anon-id': anonId || '' },
                 body: JSON.stringify({ content, anon_id: anonId, gender: gender || null })
             });
             if (!res.ok) throw new Error('Failed to post comment');
