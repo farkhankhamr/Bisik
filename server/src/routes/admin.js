@@ -211,7 +211,8 @@ const adminRoutes = async (fastify, options) => {
                 silentPosts,
                 cityAgg,
                 dailyAgg,
-                wordAgg
+                wordAgg,
+                sentimentAgg
             ] = await Promise.all([
                 Post.countDocuments({ status: 'active' }),
                 Post.countDocuments({ created_at: { $gte: since7d }, status: 'active' }),
@@ -247,6 +248,11 @@ const adminRoutes = async (fastify, options) => {
                     { $group: { _id: '$words', count: { $sum: 1 } } },
                     { $sort: { count: -1 } },
                     { $limit: 50 }
+                ]),
+                // Sentiment distribution from stored sentiment field
+                Post.aggregate([
+                    { $match: { status: 'active', sentiment: { $ne: null } } },
+                    { $group: { _id: '$sentiment', count: { $sum: 1 } } }
                 ])
             ]);
 
@@ -273,6 +279,9 @@ const adminRoutes = async (fastify, options) => {
                     percentage: arr[0] ? Math.round((w.count / arr[0].count) * 100) : 0
                 }));
 
+            const sentiment = {};
+            sentimentAgg.forEach(s => { if (s._id) sentiment[s._id] = s.count; });
+
             return {
                 success: true,
                 stats: {
@@ -286,7 +295,8 @@ const adminRoutes = async (fastify, options) => {
                     posts_with_zero_interaction: silentPosts,
                     city_dist,
                     daily_chart,
-                    topics
+                    topics,
+                    sentiment
                 }
             };
         } catch (error) {

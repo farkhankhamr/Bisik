@@ -386,7 +386,7 @@ export default function AdminDashboard() {
                 day_index: '—',
                 totals: { total_posts: d.posts, total_reactions: 0, total_comments: d.engagement },
                 safety: { reported_posts_count: d.reported || 0, auto_hidden_count: 0 },
-                sentiment: {},
+                sentiment: liveStats?.sentiment || {},
                 topics: liveStats?.topics || []
             }
         }));
