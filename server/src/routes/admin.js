@@ -232,9 +232,8 @@ const adminRoutes = async (fastify, options) => {
                     { $match: { status: 'active', created_at: { $gte: since7d } } },
                     { $project: { words: { $split: [{ $toLower: '$content' }, ' '] } } },
                     { $unwind: '$words' },
-                    { $project: { word: { $replaceAll: { input: '$words', find: /[^a-zA-Z\u00C0-\u024F]/, replacement: '' } } } },
-                    { $match: { word: { $regex: '^[a-zA-Z\u00C0-\u024F]{4,}$' } } },
-                    { $group: { _id: '$word', count: { $sum: 1 } } },
+                    { $match: { words: { $regex: '^[a-zA-Z]{4,}$' } } },
+                    { $group: { _id: '$words', count: { $sum: 1 } } },
                     { $sort: { count: -1 } },
                     { $limit: 50 }
                 ])
