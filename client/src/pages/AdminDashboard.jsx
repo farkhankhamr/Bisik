@@ -198,12 +198,13 @@ export default function AdminDashboard() {
         'Authorization': `Bearer ${sessionStorage.getItem('GOGON_ADMIN_JWT') || ''}`
     });
 
-    // Initial Check — auto-auth + fetch everything on mount
+    // Initial Check — fetch data on mount if already authenticated
     useEffect(() => {
-        console.log('[AdminDashboard] Mounting. Token:', token);
-        verifyToken(token);
-        fetchLiveStats();
-        fetchAdminSettings();
+        if (sessionStorage.getItem('GOGON_ADMIN_JWT')) {
+            verifyToken('');
+            fetchLiveStats();
+            fetchAdminSettings();
+        }
     }, []);
 
     const verifyToken = async (rawToken) => {
@@ -563,7 +564,7 @@ export default function AdminDashboard() {
                                         data={chartData}
                                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                                         onClick={(e) => {
-                                            if (e && e.activePayload && e.activePayload[0]) {
+                                            if (e?.activePayload?.[0]?.payload?.original) {
                                                 setSelectedDay(e.activePayload[0].payload.original);
                                             }
                                         }}
@@ -582,7 +583,24 @@ export default function AdminDashboard() {
                                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                             cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
                                         />
-                                        <Area type="monotone" dataKey="engagement" stroke="#4f46e5" strokeWidth={2} fillOpacity={1} fill="url(#colorEngagement)" />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="engagement"
+                                            stroke="#4f46e5"
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill="url(#colorEngagement)"
+                                            activeDot={{
+                                                r: 7,
+                                                fill: '#4f46e5',
+                                                stroke: '#fff',
+                                                strokeWidth: 2,
+                                                style: { cursor: 'pointer' },
+                                                onClick: (_, payload) => {
+                                                    if (payload?.payload?.original) setSelectedDay(payload.payload.original);
+                                                }
+                                            }}
+                                        />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
