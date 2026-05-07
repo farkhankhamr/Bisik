@@ -82,7 +82,7 @@ const DayDetailModal = ({ isOpen, onClose, data }) => {
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                     <div>
-                        <h3 className="text-xl font-bold text-slate-900">Day {data.day_index} Detail</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{data.day_index !== '—' ? `Day ${data.day_index}` : data.dateKey}</h3>
                         <p className="text-sm text-slate-500">{data.dateKey}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -349,7 +349,14 @@ export default function AdminDashboard() {
             posts: d.posts,
             engagement: d.engagement,
             reported: d.reported || 0,
-            original: null
+            original: {
+                dateKey: d.day,
+                day_index: '—',
+                totals: { total_posts: d.posts, total_reactions: 0, total_comments: d.engagement },
+                safety: { reported_posts_count: d.reported || 0, auto_hidden_count: 0 },
+                sentiment: {},
+                topics: liveStats?.topics || []
+            }
         }));
 
     // City + Topics — prefer live data (always fresh), fall back to latest summary
@@ -526,8 +533,7 @@ export default function AdminDashboard() {
                                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                                         onClick={(e) => {
                                             if (e && e.activePayload && e.activePayload[0]) {
-                                                const orig = e.activePayload[0].payload.original;
-                                                if (orig) setSelectedDay(orig);
+                                                setSelectedDay(e.activePayload[0].payload.original);
                                             }
                                         }}
                                         className="cursor-pointer"
